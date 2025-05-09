@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 700px;
+            margin: 40px;
+            padding: 30px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dfe6e9;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .submit-btn, .back-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .submit-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .back-btn {
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+        }
+        .submit-btn:hover, .back-btn:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .back-btn:hover {
+            background-color: #5a6268;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .success-message {
+            color: #28a745;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #d4edda;
+            border-radius: 6px;
+            display: none;
+        }
+        .loading {
+            text-align: center;
+            display: none;
+            margin: 20px 0;
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #007bff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Book Appointment</h1>
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage">Appointment booked successfully!</div>
+        <div class="loading" id="loading"></div>
+        <div class="form-group">
+            <label for="doctor">Doctor</label>
+            <input type="text" id="doctor" readonly>
+        </div>
+        <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" required placeholder="Enter your full name">
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" required placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+            <label for="date">Preferred Date</label>
+            <input type="date" id="date" required min="2025-05-09">
+        </div>
+        <div class="form-group">
+            <label for="time">Preferred Time</label>
+            <select id="time" required>
+                <option value="">Select Time</option>
+            </select>
+        </div>
+        <div class="btn-group">
+            <a href="index.html" class="back-btn">Back to Doctors</a>
+            <button class="submit-btn" onclick="submitAppointment()">Submit Appointment</button>
+        </div>
+    </div>
+    <script>
+        const doctors = {
+            'John Smith': ['09:00', '10:00', '11:00', '12:00', '13:00'],
+            'Emily Johnson': ['10:00', '11:00', '12:00', '13:00', '14:00'],
+            'Michael Brown': ['08:00', '09:00', '10:00', '11:00', '12:00']
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const doctorName = urlParams.get('doctor');
+        const doctorInput = document.getElementById('doctor');
+        const timeSelect = document.getElementById('time');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const loading = document.getElementById('loading');
+
+        if (!doctorName || !doctors[doctorName]) {
+            errorMessage.textContent = 'Invalid doctor selected. Redirecting to doctor list...';
+            errorMessage.style.display = 'block';
+            setTimeout(() => window.location.href = 'index.html', 2000);
+            return;
+        }
+
+        doctorInput.value = doctorName;
+
+        doctors[doctorName].forEach(time => {
+            const option = document.createElement('option');
+            option.value = time;
+            option.textContent = time;
+            timeSelect.appendChild(option);
+        });
+
+        function submitAppointment() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+
+            if (!name || !email || !date || !time) {
+                errorMessage.textContent = 'Please fill out all fields.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                errorMessage.textContent = 'Please enter a valid email address.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            errorMessage.style.display = 'none';
+            loading.style.display = 'block';
+
+            setTimeout(() => {
+                loading.style.display = 'none';
+                successMessage.style.display = 'block';
+                document.querySelector('form').reset();
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                    window.location.href = 'index.html';
+                }, 2000);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

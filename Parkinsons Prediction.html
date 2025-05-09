@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Parkinson's Disease Prediction</title>
+  <style>
+    :root {
+      --primary: #4a6fa5;
+      --secondary: #166088;
+      --accent: #4fc3f7;
+      --danger: #e74c3c;
+      --success: #2ecc71;
+      --warning: #f39c12;
+      --dark: #1a1a2e;
+      --light: #f8f9fa;
+      --gray: #e9ecef;
+      --dark-gray: #6c757d;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+      min-height: 100vh;
+      display: flex;
+      line-height: 1.6;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(135deg, #62aeec 0%, #3e61b3 100%);
+      color: white;
+      padding: 25px 0;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1000;
+      transform: translateX(-100%);
+    }
+
+    .sidebar.active,
+    .toggle-block:hover ~ .sidebar,
+    .sidebar:hover {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      padding: 0 25px 25px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-header h2 {
+      display: flex;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .sidebar-header h2 i {
+      margin-right: 10px;
+      font-size: 1.8rem;
+    }
+
+    .sidebar-menu {
+      padding: 25px;
+    }
+
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      padding: 12px 12px;
+      margin-bottom: 5px;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-menu a i {
+      margin-right: 10px;
+      font-size: 1.2rem;
+    }
+
+    .sidebar-menu a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-menu a.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      font-weight: 500;
+    }
+
+    .profile-section {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+    }
+
+    .profile-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+      object-fit: cover;
+    }
+
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-name {
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .profile-role {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    /* Toggle Block */
+    .toggle-block {
+      position: fixed;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 60px;
+      background: linear-gradient(135deg, #62aeec 0%, #3e61b3 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1100;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .toggle-block:hover {
+      background: linear-gradient(135deg, #3e61b3 0%, #62aeec 100%);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .toggle-block i {
+      color: white;
+      font-size: 1.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .toggle-block:hover i {
+      transform: scale(1.2);
+    }
+
+    /* Hide icon when sidebar is open */
+    .sidebar.active ~ .toggle-block i,
+    .toggle-block:hover ~ .sidebar ~ .toggle-block i,
+    .sidebar:hover ~ .toggle-block i {
+      display: none;
+    }
+
+    /* Main Content Styles */
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      background-color: #f5f7fa;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      color: #62aeec;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: #62aeec;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .card-title i {
+      margin-right: 10px;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin: 0 -10px;
+    }
+
+    .form-col {
+      flex: 1;
+      min-width: 250px;
+      padding: 0 10px;
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: #3e61b3;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(157, 80, 187, 0.2);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 25px;
+      background: linear-gradient(135deg, #62aeec 0%, #3e61b3 100%);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(110, 72, 170, 0.3);
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(110, 72, 170, 0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+      color: #555;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ff4d4d 0%, #f78ca0 100%);
+      box-shadow: 0 4px 10px rgba(255, 77, 77, 0.3);
+    }
+
+    .btn-danger:hover {
+      box-shadow: 0 6px 15px rgba(255, 77, 77, 0.4);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    /* Result Box */
+    .result-box {
+      background-color: #f8f9fa;
+      border-left: 4px solid #62aeec;
+      padding: 20px;
+      border-radius: 5px;
+      margin-top: 30px;
+      display: none;
+    }
+
+    .result-box h3 {
+      color: #62aeec;
+      margin-bottom: 15px;
+    }
+
+    .result-item {
+      margin-bottom: 10px;
+    }
+
+    .result-item strong {
+      color: #555;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 992px) {
+      .main-content {
+        margin-left: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .form-col {
+        min-width: 100%;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    /* Chatbot Styles */
+    #chatbot-container {
+      position: fixed;
+      bottom: 300px;
+      right: 25px;
+      width: 350px;
+      max-height: 500px;
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, #62aeec 0%, #3e61b3 100%);
+      padding: 15px 20px;
+      color: white;
+      font-weight: 500;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .chat-header i {
+      margin-right: 10px;
+      font-size: 1.3rem;
+    }
+
+    .chat-body {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background-color: #f8f9fa;
+    }
+
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #eee;
+      background: white;
+      padding: 10px;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 30px;
+      font-size: 0.95rem;
+      margin-right: 10px;
+    }
+
+    .chat-input button {
+      background: linear-gradient(135deg, #62aeec 0%, #3e61b3 100%);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      padding: 0 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .chat-input button:hover {
+      opacity: 0.9;
+    }
+
+    .message {
+      margin-bottom: 15px;
+      max-width: 80%;
+      padding: 10px 15px;
+      border-radius: 15px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      position: relative;
+    }
+
+    .message.user {
+      background: linear-gradient(135deg, #62aeec 0%, #3e61b3 100%);
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 5px;
+    }
+
+    .message.bot {
+      background-color: white;
+      color: #333;
+      margin-right: auto;
+      border-bottom-left-radius: 5px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bubblePop {
+      0% { transform: scale(0); opacity: 0; }
+      70% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .message {
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* Tooltip styles */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      margin-left: 5px;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.8rem;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .info-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      background-color: #3e61b3;
+      color: white;
+      border-radius: 50%;
+      font-size: 0.7rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Error Message */
+    .error-message {
+      color: #e74c3c;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    /* Robot Container */
+    .robot-container {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    #chatbot-toggle {
+      width: 180px;
+      height: 250px;
+      background: url('https://pngimg.com/uploads/robot/robot_PNG28.png') no-repeat center bottom;
+      background-size: contain;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    #chatbot-toggle:hover {
+      transform: scale(1.05);
+    }
+
+    /* Speech Bubble */
+    .speech-bubble {
+      position: absolute;
+      bottom: 160px;
+      right: 200px;
+      background: #e6f3ff;
+      border: 2px solid #3e61b3;
+      border-radius: 10px;
+      padding: 10px 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      font-size: 1.1rem;
+      font-family: 'Arial', sans-serif;
+      color: #333;
+      max-width: 250px;
+      display: inline-block;
+      animation: bubblePop 0.5s ease-in-out;
+    }
+
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      width: 0;
+      height: 0;
+      border: 12px solid transparent;
+      border-left-color: #e6f3ff;
+      border-right: 0;
+      margin-top: -12px;
+    }
+  </style>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+  <!-- Toggle Block -->
+  <div class="toggle-block" onclick="toggleSidebar()">
+    <i class="fas fa-angle-right"></i>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2><i class="fas fa-heartbeat"></i> HealthPredict Pro</h2>
+    </div>
+    <div class="sidebar-menu">
+      <a href="Diabetes Prediction.html"><i class="fas fa-vial"></i> Diabetes Prediction</a>
+      <a href="Heart Disease Prediction.html"><i class="fas fa-heartbeat"></i> Heart Disease Prediction</a>
+      <a href="Parkinsons Prediction.html" class="active"><i class="fas fa-brain"></i> Parkinsons Prediction</a>
+      <a href="Main page.html"><i class="fas fa-home"></i> Home</a>
+    </div>
+    <div class="profile-section">
+      <img src="https://www.w3schools.com/howto/img_avatar.png" alt="Profile" class="profile-img" id="profilePhoto">
+      <div class="profile-info">
+        <div class="profile-name" id="profileUsername">Guest</div>
+        <div class="profile-role">Patient</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="header">
+      <h1><i class="fas fa-brain"></i> Parkinson's Disease Risk Assessment</h1>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-clipboard-list"></i> Patient Information</div>
+      <form id="parkinsonsForm">
+        <div class="form-row">
+          <div class="form-col">
+            <label for="input1">MDVP:Fo(Hz)</label>
+            <input type="number" id="input1" step="any" placeholder="Average vocal fundamental frequency" required>
+          </div>
+          <div class="form-col">
+            <label for="input2">MDVP:Fhi(Hz)</label>
+            <input type="number" id="input2" step="any" placeholder="Maximum vocal fundamental frequency" required>
+          </div>
+          <div class="form-col">
+            <label for="input3">MDVP:Flo(Hz)</label>
+            <input type="number" id="input3" step="any" placeholder="Minimum vocal fundamental frequency" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <label for="input4">MDVP:Jitter(%)</label>
+            <input type="number" id="input4" step="any" placeholder="Jitter percentage" required>
+          </div>
+          <div class="form-col">
+            <label for="input5">MDVP:Jitter(Abs)</label>
+            <input type="number" id="input5" step="any" placeholder="Absolute jitter" required>
+          </div>
+          <div class="form-col">
+            <label for="input6">MDVP:RAP</label>
+            <input type="number" id="input6" step="any" placeholder="Relative amplitude perturbation" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <label for="input7">MDVP:PPQ</label>
+            <input type="number" id="input7" step="any" placeholder="Five-point period perturbation quotient" required>
+          </div>
+          <div class="form-col">
+            <label for="input8">Jitter:DDP</label>
+            <input type="number" id="input8" step="any" placeholder="Average absolute difference of differences between consecutive periods" required>
+          </div>
+          <div class="form-col">
+            <label for="input9">MDVP:Shimmer</label>
+            <input type="number" id="input9" step="any" placeholder="Local shimmer" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <label for="input10">MDVP:Shimmer(dB)</label>
+            <input type="number" id="input10" step="any" placeholder="Local shimmer in dB" required>
+          </div>
+          <div class="form-col">
+            <label for="input11">Shimmer:APQ3</label>
+            <input type="number" id="input11" step="any" placeholder="Three-point amplitude perturbation quotient" required>
+          </div>
+          <div class="form-col">
+            <label for="input12">Shimmer:APQ5</label>
+            <input type="number" id="input12" step="any" placeholder="Five-point amplitude perturbation quotient" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <label for="input13">MDVP:APQ</label>
+            <input type="number" id="input13" step="any" placeholder="Amplitude perturbation quotient" required>
+          </div>
+          <div class="form-col">
+            <label for="input14">Shimmer:DDA</label>
+            <input type="number" id="input14" step="any" placeholder="Average absolute difference between consecutive differences of amplitudes" required>
+          </div>
+          <div class="form-col">
+            <label for="input15">NHR</label>
+            <input type="number" id="input15" step="any" placeholder="Noise-to-harmonics ratio" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <label for="input16">HNR</label>
+            <input type="number" id="input16" step="any" placeholder="Harmonics-to-noise ratio" required>
+          </div>
+          <div class="form-col">
+            <label for="input17">RPDE</label>
+            <input type="number" id="input17" step="any" placeholder="Recurrence period density entropy" required>
+          </div>
+          <div class="form-col">
+            <label for="input18">DFA</label>
+            <input type="number" id="input18" step="any" placeholder="Detrended fluctuation analysis" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <label for="input19">spread1</label>
+            <input type="number" id="input19" step="any" placeholder="Nonlinear measure of fundamental frequency variation" required>
+          </div>
+          <div class="form-col">
+            <label for="input20">spread2</label>
+            <input type="number" id="input20" step="any" placeholder="Nonlinear measure of fundamental frequency variation" required>
+          </div>
+          <div class="form-col">
+            <label for="input21">D2</label>
+            <input type="number" id="input21" step="any" placeholder="Correlation dimension" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <label for="input22">PPE</label>
+            <input type="number" id="input22" step="any" placeholder="Pitch period entropy" required>
+          </div>
+          <div class="form-col">
+            <label for="age">Age (Years)</label>
+            <input type="number" id="age" placeholder="Enter age" min="1" max="120" required>
+          </div>
+          <div class="form-col">
+            <label for="sex">Sex</label>
+            <select id="sex" required>
+              <option value="" disabled selected>Select sex</option>
+              <option value="1">Male</option>
+              <option value="0">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="error-message" id="error-message"></div>
+
+        <div class="btn-group">
+          <button type="submit" class="btn"><i class="fas fa-brain"></i> Predict Parkinson's Disease</button>
+          <button type="button" class="btn btn-secondary" onclick="clearForm()"><i class="fas fa-eraser"></i> Clear Form</button>
+          <button type="button" class="btn" id="checkProgressionBtn" onclick="checkProgression()" disabled><i class="fas fa-chart-line"></i> Check Progression</button>
+          <button type="button" class="btn" id="consultBtn" onclick="window.location.href='ParkinsonsAppointment.html'">Consult Doctor</button>
+        </div>
+      </form>
+
+      <div class="result-box" id="result">
+        <h3><i class="fas fa-clipboard-check"></i> Prediction Result</h3>
+        <div class="result-item" id="resultText"></div>
+        <div class="result-item" id="severityText"></div>
+        <div class="result-item" id="recommendationText"></div>
+        <div class="btn-group" style="margin-top: 20px;">
+          <button class="btn" id="printBtn" onclick="generatePDF()" style="display: none;"><i class="fas fa-download"></i> Download Report</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Robot Container -->
+  <div class="robot-container">
+    <div class="speech-bubble" id="speech-bubble"></div>
+    <button id="chatbot-toggle"></button>
+  </div>
+
+  <!-- Chatbot Container -->
+  <div id="chatbot-container">
+    <div class="chat-header">
+      <i class="fas fa-brain"></i> Neuro Care Assistant
+    </div>
+    <div class="chat-body" id="chat-body">
+      <div class="message bot">Hello! I'm your Neuro Care Assistant. Ask me anything about Parkinson's disease symptoms, treatments, and management.</div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chat-input" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
+      <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.16/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAbq99pDtYuiwtIWj6oV_YO3mmiNVofQZc",
+      authDomain: "disease-prediction-d046b.firebaseapp.com",
+      databaseURL: "https://disease-prediction-d046b-default-rtdb.firebaseio.com",
+      projectId: "disease-prediction-d046b",
+      storageBucket: "disease-prediction-d046b.appspot.com",
+      messagingSenderId: "766071515146",
+      appId: "1:766071515146:web:0dfdca1502dccc513497f3",
+      measurementId: "G-QGQYYJZVFQ"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Toggle sidebar
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("active");
+    }
+
+    // Check progression
+    function checkProgression() {
+      if (!document.getElementById("checkProgressionBtn").disabled) {
+        window.location.href = 'ParkinsonsMonitoringDashboard.html';
+      }
+    }
+
+    // Global variable to store prediction result
+    let predictionResult = null;
+
+    // Update profile info with username from localStorage
+    function updateProfile() {
+      const username = localStorage.getItem('loggedInUsername') || 'Guest';
+      const profileUsername = document.getElementById('profileUsername');
+      if (profileUsername) {
+        profileUsername.textContent = username;
+      } else {
+        console.error('Profile username element not found');
+      }
+    }
+
+    // Call updateProfile and speakGreeting when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      updateProfile();
+      speakGreeting();
+    });
+
+    // Clear form function
+    function clearForm() {
+      document.getElementById("parkinsonsForm").reset();
+      document.getElementById("result").style.display = "none";
+      document.getElementById("printBtn").style.display = "none";
+      document.getElementById("checkProgressionBtn").disabled = true;
+      document.getElementById("error-message").style.display = "none";
+    }
+
+    // Form submission handler
+    document.getElementById("parkinsonsForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      
+      // Collect form data
+      const formData = {};
+      for (let i = 1; i <= 22; i++) {
+        formData[`input${i}`] = document.getElementById(`input${i}`).value;
+      }
+      formData.age = document.getElementById("age").value;
+      formData.sex = document.getElementById("sex").value;
+
+      // Validate all inputs
+      let allValid = true;
+      const errorMsg = document.getElementById("error-message");
+      
+      for (let key in formData) {
+        if (formData[key] === "" || (key !== 'sex' && isNaN(parseFloat(formData[key])))) {
+          allValid = false;
+          break;
+        }
+      }
+
+      if (!allValid) {
+        errorMsg.textContent = "Please fill in all fields with valid numbers.";
+        errorMsg.style.display = "block";
+        return;
+      }
+
+      errorMsg.style.display = "none";
+
+      // Prepare input array with the 22 features (excluding age and sex)
+      const inputArray = [];
+      for (let i = 1; i <= 22; i++) {
+        inputArray.push(parseFloat(formData[`input${i}`]));
+      }
+
+      // Store age and gender in localStorage for dashboard
+      localStorage.setItem('parkinsonsPredictionAge', formData.age);
+      localStorage.setItem('parkinsonsPredictionGender', formData.sex);
+
+      try {
+        // Send data to Flask backend
+        const response = await fetch('http://localhost:5000/predict/parkinsons', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ input: inputArray })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Process the prediction result
+          const hasParkinsons = data.result === "Parkinson's Detected";
+          const severity = hasParkinsons ? "Moderate" : "None"; // Simplified severity based on prediction
+          const recommendations = hasParkinsons ?
+            "Consult a neurologist for further evaluation. Regular exercise and speech therapy may help." :
+            "No immediate concerns detected. Maintain regular checkups for monitoring.";
+
+          // Store the prediction result
+          predictionResult = {
+            result: hasParkinsons,
+            severity: severity,
+            recommendations: recommendations
+          };
+
+          // Display results
+          document.getElementById("resultText").innerHTML = `<strong>Prediction:</strong> ${hasParkinsons ? "High Risk of Parkinson's Disease" : "Low Risk of Parkinson's Disease"}`;
+          document.getElementById("severityText").innerHTML = `<strong>Severity:</strong> ${severity}`;
+          document.getElementById("recommendationText").innerHTML = `<strong>Recommendations:</strong> ${recommendations}`;
+          
+          document.getElementById("result").style.display = "block";
+          document.getElementById("printBtn").style.display = "inline-block";
+          document.getElementById("checkProgressionBtn").disabled = false;
+
+          // Save prediction to Firebase
+          const username = localStorage.getItem('loggedInUsername') || 'Guest';
+          const sanitizedUsername = username.replace(/[.#$[\]]/g, '_');
+          const timestamp = Date.now();
+          const predictionRef = database.ref(`users/${sanitizedUsername}/parkinsons_predictions/${timestamp}`);
+
+          const predictionData = {
+            ...formData,
+            result: predictionResult.result,
+            severity: predictionResult.severity,
+            recommendations: predictionResult.recommendations
+          };
+
+          await predictionRef.set(predictionData);
+          console.log('Prediction saved to Firebase');
+        } else {
+          throw new Error(data.error || 'Prediction failed');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        errorMsg.textContent = "Failed to get prediction. Please try again.";
+        errorMsg.style.display = "block";
+      }
+    });
+
+    // Generate PDF report
+    function generatePDF() {
+      if (!predictionResult) {
+        alert("No prediction result to download!");
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      // Get user name from localStorage
+      const username = localStorage.getItem('loggedInUsername') || 'Guest';
+      
+      // Get current date in readable format
+      const today = new Date();
+      const dateString = today.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'long'
+      });
+
+      // Add header with styling
+      doc.setFillColor(110, 72, 170); // Purple color
+      doc.rect(0, 0, 220, 25, 'F');
+      doc.setFontSize(16);
+      doc.setTextColor(255, 255, 255);
+      doc.text("Parkinson's Disease Prediction Report", 105, 16, { align: 'center' });
+      
+      // Reset text color
+      doc.setTextColor(0, 0, 0);
+      
+      // Add user info and date
+      doc.setFontSize(12);
+      doc.text(`Patient Name: ${username}`, 20, 35);
+      doc.text(`Report Date: ${dateString}`, 20, 45);
+      
+      // Add horizontal line
+      doc.setDrawColor(110, 72, 170);
+      doc.line(20, 50, 190, 50);
+      
+      // Get all form values for the table
+      const inputLabels = [
+        "MDVP:Fo(Hz)", "MDVP:Fhi(Hz)", "MDVP:Flo(Hz)", 
+        "MDVP:Jitter(%)", "MDVP:Jitter(Abs)", "MDVP:RAP",
+        "MDVP:PPQ", "Jitter:DDP", "MDVP:Shimmer",
+        "MDVP:Shimmer(dB)", "Shimmer:APQ3", "Shimmer:APQ5",
+        "MDVP:APQ", "Shimmer:DDA", "NHR", "HNR",
+        "RPDE", "DFA", "spread1", "spread2", "D2", "PPE",
+        "Age", "Sex"
+      ];
+      
+      const values = [];
+      for (let i = 1; i <= 22; i++) {
+        values.push(document.getElementById(`input${i}`).value);
+      }
+      values.push(document.getElementById("age").value + " years");
+      values.push(document.getElementById("sex").options[document.getElementById("sex").selectedIndex].text);
+      
+      const tableData = inputLabels.map((label, index) => [label, values[index]]);
+
+      // Add table with input values
+      doc.autoTable({
+        head: [["Parameter", "Value"]],
+        body: tableData,
+        startY: 60,
+        theme: "grid",
+        headStyles: { 
+          fillColor: [110, 72, 170],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        styles: { 
+          fontSize: 10, 
+          halign: "center",
+          cellPadding: 3
+        },
+        columnStyles: {
+          0: { fontStyle: 'bold', halign: 'left' }
+        }
+      });
+
+      // Add prediction result with styling
+      const y = doc.lastAutoTable.finalY + 15;
+      doc.setFontSize(14);
+      doc.setTextColor(110, 72, 170);
+      doc.text("Prediction Results:", 20, y);
+      
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Prediction: ${predictionResult.result ? "High Risk of Parkinson's Disease" : "Low Risk of Parkinson's Disease"}`, 25, y + 10);
+      doc.text(`Severity: ${predictionResult.severity}`, 25, y + 20);
+      doc.text(`Recommendations: ${predictionResult.recommendations}`, 25, y + 30);
+      
+      // Add important note
+      const noteY = y + 50;
+      doc.setFontSize(10);
+      doc.setTextColor(110, 72, 170);
+      doc.text("Important Note:", 20, noteY);
+      doc.setFontSize(9);
+      doc.setTextColor(0, 0, 0);
+      doc.text("This report is generated by predictive algorithms and should not replace professional medical advice.", 20, noteY + 5, { maxWidth: 170 });
+      
+      // Add footer
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text("Generated by Disease Prediction System", 105, 285, { align: 'center' });
+      
+      // Save the PDF
+      const filename = `Parkinsons_Report_${username}_${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}.pdf`;
+      doc.save(filename);
+    }
+
+    // Chatbot functionality
+    const toggleBtn = document.getElementById("chatbot-toggle");
+    const chatbotContainer = document.getElementById("chatbot-container");
+    const chatBody = document.getElementById("chat-body");
+    const chatInput = document.getElementById("chat-input");
+    const speechBubble = document.getElementById("speech-bubble");
+
+    toggleBtn.addEventListener("click", () => {
+      chatbotContainer.style.display = chatbotContainer.style.display === "flex" ? "none" : "flex";
+      if (chatbotContainer.style.display === "flex") {
+        chatInput.focus();
+        speechBubble.style.display = "none";
+      } else {
+        speechBubble.style.display = "inline-block";
+      }
+    });
+
+    // Function to handle both speech and typing animation on page load
+    function speakGreeting() {
+      const spokenText = "I am personalized health assistant. How can I help you today?";
+      const displayText = "How can I help you today?";
+      const utterance = new SpeechSynthesisUtterance(spokenText);
+      utterance.lang = 'en-GB';
+      utterance.volume = 1;
+      utterance.rate = 0.9;
+      utterance.pitch = 1.5;
+
+      // Select a female voice
+      const voices = window.speechSynthesis.getVoices();
+      const femaleVoice = voices.find(voice => 
+        voice.name.toLowerCase().includes('google uk english female')
+      );
+
+      if (femaleVoice) {
+        utterance.voice = femaleVoice;
+        console.log('Selected voice:', femaleVoice.name);
+      } else {
+        console.warn('No female voice found. Using default voice. Available voices:', voices.map(v => v.name));
+      }
+
+      // Cancel any ongoing speech to prevent overlap
+      window.speechSynthesis.cancel();
+
+      // Measure the start time of the speech
+      let startTime;
+      utterance.onstart = () => {
+        startTime = Date.now();
+      };
+
+      // Measure the end time of the speech to calculate duration
+      utterance.onend = () => {
+        const endTime = Date.now();
+        const speechDuration = endTime - startTime;
+        console.log('Speech duration:', speechDuration, 'ms');
+      };
+
+      // Default speech duration if onend doesn't fire (fallback)
+      const estimatedSpeechDuration = 3000;
+
+      // Start the speech
+      window.speechSynthesis.speak(utterance);
+
+      // Typing animation for display text
+      speechBubble.textContent = ""; // Reset the speech bubble
+      let index = 0;
+      const typingSpeed = 100; // Fixed speed of 100ms per character for consistency
+
+      // Clear any existing typing animation
+      let typingInterval = null;
+      if (window.typingInterval) {
+        clearInterval(window.typingInterval);
+      }
+
+      // Start typing animation using setInterval
+      typingInterval = setInterval(() => {
+        if (index < displayText.length) {
+          speechBubble.textContent = displayText.substring(0, index + 1);
+          index++;
+        } else {
+          clearInterval(typingInterval);
+        }
+      }, typingSpeed);
+
+      // Store the interval ID to allow cleanup if needed
+      window.typingInterval = typingInterval;
+
+      // Fallback: If speech synthesis fails or isn't supported, ensure the text is displayed
+      setTimeout(() => {
+        if (speechBubble.textContent !== displayText) {
+          speechBubble.textContent = displayText;
+        }
+      }, estimatedSpeechDuration + 500);
+    }
+
+    // Ensure voices are loaded before speaking
+    window.speechSynthesis.onvoiceschanged = function() {
+      if (window.speechSynthesis.getVoices().length > 0) {
+        speakGreeting();
+      } else {
+        console.warn('No voices available');
+        speechBubble.textContent = "How can I help you today?";
+      }
+    };
+
+    function handleKeyPress(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    }
+
+    function sendMessage() {
+      const msg = chatInput.value.trim();
+      if (!msg) return;
+
+      // Display user message
+      const userDiv = document.createElement("div");
+      userDiv.className = "message user";
+      userDiv.textContent = msg;
+      chatBody.appendChild(userDiv);
+
+      // Scroll to bottom
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      // Clear input
+      chatInput.value = "";
+
+      // Show "Thinking..." message
+      const thinkingDiv = document.createElement("div");
+      thinkingDiv.className = "message bot";
+      thinkingDiv.textContent = "Thinking...";
+      chatBody.appendChild(thinkingDiv);
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      // Simulate bot response after delay
+      setTimeout(() => {
+        // Remove "Thinking..." message
+        chatBody.removeChild(thinkingDiv);
+        
+        // Create and show actual response
+        const botDiv = document.createElement("div");
+        botDiv.className = "message bot";
+        botDiv.innerHTML = getParkinsonsBotResponse(msg).replace(/\n/g, '<br>');
+        chatBody.appendChild(botDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }, 1500);
+    }
+
+    function getParkinsonsBotResponse(msg) {
+      const lower = msg.toLowerCase();
+      
+      if (lower.includes("symptom")) {
+        return "Parkinson's symptoms:\n• Tremors (shaking)\n• Slowed movement (bradykinesia)\n• Rigid muscles\n• Impaired posture/balance\n• Loss of automatic movements\n• Speech changes\n• Writing changes\n• Sleep problems\n• Fatigue\n• Cognitive changes";
+      }
+      if (lower.includes("cause") || lower.includes("why")) {
+        return "Parkinson's causes:\n• Loss of dopamine-producing neurons\n• Lewy bodies (protein clumps)\n• Genetic factors (in some cases)\n• Environmental triggers\n• Age (usually develops after 60)\n• More common in men\n• Head trauma may increase risk";
+      }
+      if (lower.includes("treatment") || lower.includes("medication") || lower.includes("drug")) {
+        return "Parkinson's treatments:\n• Levodopa-carbidopa (most effective)\n• Dopamine agonists\n• MAO-B inhibitors\n• COMT inhibitors\n• Anticholinergics\n• Amantadine\n• Deep brain stimulation\n• Physical therapy\n• Occupational therapy\n• Speech therapy";
+      }
+      if (lower.includes("exercise") || lower.includes("physical")) {
+        return "Exercise for Parkinson's:\n• Tai Chi (improves balance)\n• Boxing (helps coordination)\n• Dance (improves mobility)\n• Yoga (flexibility/relaxation)\n• Aerobic exercise\n• Strength training\n• Stretching\n• Walking\n• Swimming\n• Cycling";
+      }
+      if (lower.includes("diet") || lower.includes("food") || lower.includes("eat")) {
+        return "Diet for Parkinson's:\n• High-fiber foods (constipation common)\n• Omega-3 fatty acids\n• Antioxidant-rich foods\n• Protein timing (affects medication)\n• Stay hydrated\n• Small frequent meals\n• Soft foods if swallowing issues\n• Limit dairy (may affect symptoms)";
+      }
+      if (lower.includes("early") || lower.includes("sign")) {
+        return "Early signs of Parkinson's:\n• Slight tremor in one hand\n• Reduced arm swing\n• Smaller handwriting\n• Loss of smell\n• Trouble sleeping\n• Constipation\n• Soft/slow speech\n• Masked face (reduced expression)\n• Dizziness/fainting\n• Stooping/hunched posture";
+      }
+      if (lower.includes("progression") || lower.includes("stage")) {
+        return "Parkinson's stages:\n1. Mild symptoms on one side\n2. Symptoms on both sides\n3. Balance issues but still independent\n4. Severe disability but can walk/stand\n5. Wheelchair/bed-bound\n\nProgression varies by individual";
+      }
+      if (lower.includes("diagnos") || lower.includes("test")) {
+        return "Diagnosing Parkinson's:\n• Neurological exam\n• Medical history\n• DaTscan (brain imaging)\n• Blood tests (rule out others)\n• No single definitive test\n• Response to medication helps confirm";
+      }
+      if (lower.includes("life expectancy") || lower.includes("live")) {
+        return "Life expectancy with Parkinson's:\n• Most live as long as others\n• Progression typically 10-20 years\n• Quality of life more important\n• Modern treatments help significantly\n• Complications (like falls) are bigger risk";
+      }
+      if (lower.includes("care") || lower.includes("caregiv")) {
+        return "Caregiving tips:\n• Learn about the disease\n• Be patient with movements\n• Modify home for safety\n• Help with medication schedule\n• Encourage exercise\n• Watch for depression\n• Join support groups\n• Take care of yourself too";
+      }
+      if (lower.includes("speech") || lower.includes("talk")) {
+        return "Speech issues in Parkinson's:\n• Soft voice (hypophonia)\n• Monotone speech\n• Mumbled words\n• Rapid speech\n• Speech therapy helps\n• Exercises:\n  - Loud reading\n  - Exaggerated articulation\n  - Breathing exercises";
+      }
+      if (lower.includes("sleep")) {
+        return "Sleep problems in Parkinson's:\n• Insomnia\n• REM sleep behavior disorder\n• Restless legs\n• Frequent urination\n• Daytime sleepiness\n• Tips:\n  - Regular schedule\n  - Limit caffeine\n  - Comfortable bedding\n  - Medication review";
+      }
+      if (lower.includes("depression") || lower.includes("anxiety")) {
+        return "Mental health with Parkinson's:\n• Depression common (40-50%)\n• Anxiety also frequent\n• Can worsen motor symptoms\n• Treatable with:\n  - Therapy\n  - Medication\n  - Support groups\n  - Exercise";
+      }
+      if (lower.includes("new") || lower.includes("research")) {
+        return "Recent Parkinson's research:\n• Stem cell therapies\n• Gene therapies\n• New drug formulations\n• Focus on early detection\n• Gut-brain connection\n• Immunotherapies\n• Wearable tech for monitoring\n• Personalized medicine approaches";
+      }
+      if (lower.includes("hello") || lower.includes("hi")) {
+        return "Hello! I'm NeuroCare Bot. Ask me about Parkinson's disease symptoms, treatments, and management.";
+      }
+      if (lower.includes("thank")) {
+        return "You're welcome! Let me know if you have other questions about Parkinson's.";
+      }
+      if (lower.includes("neurologist")) {
+        return "A neurologist is a doctor who specializes in brain and nervous system disorders, including Parkinson's disease.";
+      }
+      if (lower.includes("tremor")) {
+        return "Tremors are common in Parkinson's but:\n• Not everyone with tremors has Parkinson's\n• Essential tremor is different\n• Parkinson's tremors often start asymmetrically\n• Occur at rest (pill-rolling)\n• May improve with voluntary movement";
+      }
+      if (lower.includes("levodopa")) {
+        return "Levodopa:\n• Gold standard Parkinson's treatment\n• Converted to dopamine in brain\n• Often combined with carbidopa\n• Side effects may include:\n  - Dyskinesias\n  - Nausea\n  - Dizziness\n• Works best when timed with meals";
+      }
+      
+      return "I'm not sure I understand. Could you ask about something related to Parkinson's disease? Try:\n• Symptoms\n• Treatments\n• Exercises\n• Diet\n• Diagnosis\n• Caregiving";
+    }
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c66e1ddf08bfed',t:'MTc0NjY4MDgxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

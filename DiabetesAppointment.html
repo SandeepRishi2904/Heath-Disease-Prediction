@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetic Doctors</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .doctor-cards {
+            display: flex;
+            justify-content: center; /* Center the cards horizontally */
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .doctor-card {
+            background: white;
+            border-radius: 8px;
+            /* Default shadow with a subtle glowing effect */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1), 0 0 15px rgba(0, 123, 255, 0.3); /* Added glowing effect */
+            width: 350px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease; /* Smooth transition for all effects */
+        }
+        .doctor-card:hover {
+            transform: translateY(-5px); /* Existing lift effect on hover */
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2), 0 0 25px rgba(0, 123, 255, 0.5); /* Enhanced shadow and glow on hover */
+            background-color: #f9f9f9; /* Existing subtle background change */
+        }
+        .doctor-card h2 {
+            margin: 0;
+            color: #333;
+            font-size: 1.5rem;
+        }
+        .doctor-card p {
+            color: #666;
+            margin: 12px 0;
+            font-size: 1rem;
+        }
+        .book-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 12px;
+            transition: background-color 0.3s ease;
+        }
+        .book-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center;">Diabetic Specialists</h1>
+        <div class="doctor-cards">
+            <div class="doctor-card">
+                <h2>Dr. John Smith</h2>
+                <p><strong>Specialization:</strong> Endocriology</p>
+                <p><strong>Hospital:</strong> City Health Hospital</p>
+                <p><strong>Available Time:</strong> Mon-Fri, 9 AM - 2 PM</p>
+                <a href="Doc1DiabetesAppointment.html" class="book-btn">Book Appointment</a>
+            </div>
+            <div class="doctor-card">
+                <h2>Dr. Emily Johnson</h2>
+                <p><strong>Specialization:</strong> Diabetology</p>
+                <p><strong>Hospital:</strong> Metro Care Clinic</p>
+                <p><strong>Available Time:</strong> Tue-Sat, 10 AM - 3 PM</p>
+                <a href="Doc1DiabetesAppointment.html" class="book-btn">Book Appointment</a>
+            </div>
+            <div class="doctor-card">
+                <h2>Dr. Michael Brown</h2>
+                <p><strong>Specialization:</strong> Endocriology</p>
+                <p><strong>Hospital:</strong> Wellness Medical Center</p>
+                <p><strong>Available Time:</strong> Mon-Thu, 8 AM - 1 PM</p>
+                <a href="Doc1DiabetesAppointment.html" class="book-btn">Book Appointment</a>
+            </div>
+        </div>
+    </div>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c663ea8fab44fd',t:'MTc0NjY4MDM5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>

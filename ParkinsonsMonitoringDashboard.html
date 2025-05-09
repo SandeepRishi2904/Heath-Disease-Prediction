@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parkinson's Disease Progression Dashboard</title>
+    <style>
+        :root {
+            --primary: #4285f4;
+            --danger: #ea4335;
+            --warning: #fbbc05;
+            --success: #34a853;
+            --gray: #f1f3f4;
+            --dark-gray: #5f6368;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #202124;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .patient-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .patient-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .patient-details h2 {
+            margin-bottom: 5px;
+        }
+        
+        .patient-meta {
+            display: flex;
+            gap: 15px;
+            color: var(--dark-gray);
+            font-size: 14px;
+        }
+        
+        .alert-badge {
+            background-color: var(--danger);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--dark-gray);
+            color: var(--dark-gray);
+        }
+        
+        .trend-card {
+            grid-column: span 8;
+        }
+        
+        .summary-card {
+            grid-column: span 4;
+        }
+        
+        .metrics-card {
+            grid-column: span 6;
+        }
+        
+        .alerts-card {
+            grid-column: span 6;
+        }
+        
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .metric-label {
+            font-size: 14px;
+            color: var(--dark-gray);
+        }
+        
+        .metric-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .metric-change {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+        
+        .positive {
+            color: var(--success);
+        }
+        
+        .negative {
+            color: var(--danger);
+        }
+        
+        .neutral {
+            color: var(--dark-gray);
+        }
+        
+        .alert-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .alert-item:last-child {
+            border-bottom: none;
+        }
+        
+        .alert-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .alert-critical {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .alert-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .alert-info {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .alert-content {
+            flex-grow: 1;
+        }
+        
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .alert-message {
+            font-size: 14px;
+            color: var(--dark-gray);
+        }
+        
+        .alert-time {
+            font-size: 12px;
+            color: var(--dark-gray);
+        }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--gray);
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .risk-meter {
+            height: 10px;
+            background: linear-gradient(to right, #34a853, #fbbc05, #ea4335);
+            border-radius: 5px;
+            margin-top: 10px;
+            position: relative;
+        }
+        
+        .risk-indicator {
+            position: absolute;
+            top: -5px;
+            width: 4px;
+            height: 20px;
+            background-color: black;
+            transform: translateX(-50%);
+        }
+        
+        .test-results {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .test-item {
+            background-color: var(--gray);
+            padding: 10px;
+            border-radius: 6px;
+        }
+        
+        .test-label {
+            font-size: 13px;
+            color: var(--dark-gray);
+        }
+        
+        .test-value {
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .metric-card {
+            background-color: var(--gray);
+            padding: 12px;
+            border-radius: 6px;
+        }
+        
+        .metric-card-title {
+            font-size: 12px;
+            color: var(--dark-gray);
+            margin-bottom: 5px;
+        }
+        
+        .metric-card-value {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .trend-card,
+            .summary-card,
+            .metrics-card,
+            .alerts-card {
+                grid-column: span 1;
+            }
+            
+            .test-results,
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="patient-info">
+                <div class="patient-avatar" id="patientAvatar"></div>
+                <div class="patient-details">
+                    <h2 id="patientName"></h2>
+                    <div class="patient-meta">
+                        <span id="patientAge">Age: Unknown</span>
+                        <span id="patientGender">Gender: Unknown</span>
+                    </div>
+                </div>
+            </div>
+            <div class="alert-badge" id="progressionBadge">N/A</div>
+        </header>
+        
+        <div class="dashboard-grid">
+            <!-- Trend Card -->
+            <div class="card trend-card">
+                <div class="card-header">
+                    <div class="card-title">Vocal Feature Trends</div>
+                    <div class="card-actions">
+                        <button class="btn btn-outline" data-period="90">3M</button>
+                        <button class="btn btn-outline" data-period="180">6M</button>
+                        <button class="btn btn-primary" data-period="365">1Y</button>
+                    </div>
+                </div>
+                <div class="tab-container">
+                    <div class="tab active" data-type="fundamental">Fundamental Frequency</div>
+                    <div class="tab" data-type="jitter">Jitter Measures</div>
+                    <div class="tab" data-type="shimmer">Shimmer Measures</div>
+                    <div class="tab" data-type="hnr_nhr">HNR/NHR</div>
+                    <div class="tab" data-type="nonlinear">Nonlinear Measures</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Summary Card -->
+            <div class="card summary-card">
+                <div class="card-header">
+                    <div class="card-title">Parkinson's Summary</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-info">
+                        <div class="metric-label">Current Stage</div>
+                        <div class="metric-value" id="currentStage">N/A</div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-info">
+                        <div class="metric-label">Last Assessment</div>
+                        <div class="metric-value" id="lastAssessment">N/A</div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-info">
+                        <div class="metric-label">Progression Risk</div>
+                        <div class="metric-value" id="progressionRisk">N/A</div>
+                    </div>
+                    <div class="risk-meter">
+                        <div class="risk-indicator" id="riskIndicator"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Metrics Card -->
+            <div class="card metrics-card">
+                <div class="card-header">
+                    <div class="card-title">Key Vocal Metrics</div>
+                </div>
+                <div class="metric-grid" id="keyVocalMetrics">
+                    <div class="metric-card">
+                        <div class="metric-card-title">MDVP:Fo(Hz)</div>
+                        <div class="metric-card-value" id="mdvpFo">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">MDVP:Fhi(Hz)</div>
+                        <div class="metric-card-value" id="mdvpFhi">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">MDVP:Flo(Hz)</div>
+                        <div class="metric-card-value" id="mdvpFlo">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">MDVP:Jitter(%)</div>
+                        <div class="metric-card-value" id="mdvpJitter">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">MDVP:Jitter(Abs)</div>
+                        <div class="metric-card-value" id="mdvpJitterAbs">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">MDVP:RAP</div>
+                        <div class="metric-card-value" id="mdvpRap">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">MDVP:PPQ</div>
+                        <div class="metric-card-value" id="mdvpPpq">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">Jitter:DDP</div>
+                        <div class="metric-card-value" id="jitterDdp">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">MDVP:Shimmer</div>
+                        <div class="metric-card-value" id="mdvpShimmer">N/A</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alerts Card -->
+            <div class="card alerts-card">
+                <div class="card-header">
+                    <div class="card-title">Clinical Alerts & Recommendations</div>
+                </div>
+                <div id="alertsContainer">
+                    <!-- Alerts will be dynamically added here -->
+                </div>
+            </div>
+            
+            <!-- Additional Metrics Card -->
+            <div class="card metrics-card">
+                <div class="card-header">
+                    <div class="card-title">Advanced Vocal Analysis</div>
+                </div>
+                <div class="metric-grid" id="advancedVocalMetrics">
+                    <div class="metric-card">
+                        <div class="metric-card-title">MDVP:Shimmer(dB)</div>
+                        <div class="metric-card-value" id="mdvpShimmerDb">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">Shimmer:APQ3</div>
+                        <div class="metric-card-value" id="shimmerApq3">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">Shimmer:APQ5</div>
+                        <div class="metric-card-value" id="shimmerApq5">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">MDVP:APQ</div>
+                        <div class="metric-card-value" id="mdvpApq">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">Shimmer:DDA</div>
+                        <div class="metric-card-value" id="shimmerDda">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">NHR</div>
+                        <div class="metric-card-value" id="nhr">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">HNR</div>
+                        <div class="metric-card-value" id="hnr">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">RPDE</div>
+                        <div class="metric-card-value" id="rpde">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">DFA</div>
+                        <div class="metric-card-value" id="dfa">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">spread1</div>
+                        <div class="metric-card-value" id="spread1">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">spread2</div>
+                        <div class="metric-card-value" id="spread2">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">D2</div>
+                        <div class="metric-card-value" id="d2">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">PPE</div>
+                        <div class="metric-card-value" id="ppe">N/A</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbq99pDtYuiwtIWj6oV_YO3mmiNVofQZc",
+            authDomain: "disease-prediction-d046b.firebaseapp.com",
+            databaseURL: "https://disease-prediction-d046b-default-rtdb.firebaseio.com",
+            projectId: "disease-prediction-d046b",
+            storageBucket: "disease-prediction-d046b.appspot.com",
+            messagingSenderId: "766071515146",
+            appId: "1:766071515146:web:0dfdca1502dccc513497f3",
+            measurementId: "G-QGQYYJZVFQ"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Global variables
+        let trendChart;
+        let historicalData = [];
+        let currentPeriod = 365; // Default to 1 year
+        let currentType = 'fundamental'; // Default to Fundamental Frequency
+
+        // Helper function to format timestamp to date string
+        function formatTimestamp(timestamp) {
+            const date = new Date(parseInt(timestamp));
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        // Helper function to filter data by period
+        function filterDataByPeriod(data, days) {
+            const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+            return data.filter(item => parseInt(item.timestamp) >= cutoff);
+        }
+
+        // Fetch historical data from Firebase
+        function fetchHistoricalData(callback) {
+            const username = localStorage.getItem('loggedInUsername') || 'Guest';
+            const sanitizedUsername = username.replace(/[.#$[\]]/g, '_');
+            const predictionsRef = database.ref(`users/${sanitizedUsername}/parkinsons_predictions`);
+
+            predictionsRef.once('value', (snapshot) => {
+                historicalData = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        const data = child.val();
+                        data.timestamp = child.key; // Store timestamp
+                        historicalData.push(data);
+                    });
+                    historicalData.sort((a, b) => parseInt(a.timestamp) - parseInt(b.timestamp));
+                }
+                callback();
+            }).catch(error => {
+                console.error('Error fetching historical data:', error);
+                callback();
+            });
+        }
+
+        // Initialize or update chart
+        function updateChart() {
+            const filteredData = filterDataByPeriod(historicalData, currentPeriod);
+            let labels = filteredData.map(item => formatTimestamp(item.timestamp));
+            let datasets = [];
+
+            if (filteredData.length === 0) {
+                labels = Array.from({ length: Math.min(currentPeriod, 30) }, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - currentPeriod + i * (currentPeriod / 30));
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+            }
+
+            if (currentType === 'fundamental') {
+                datasets = [
+                    {
+                        label: 'MDVP:Fo(Hz) - Fundamental Frequency',
+                        data: filteredData.length ? filteredData.map(item => parseFloat(item.input1) || 0) : Array(labels.length).fill(0),
+                        borderColor: '#4285f4',
+                        backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Normal Range',
+                        data: Array(labels.length).fill(147.0),
+                        borderColor: '#34a853',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0
+                    }
+                ];
+                trendChart.options.scales.y = {
+                    title: { display: true, text: 'Fundamental Frequency (Hz)' },
+                    min: filteredData.length ? Math.max(100, Math.min(...filteredData.map(item => parseFloat(item.input1))) - 10) : 140,
+                    max: filteredData.length ? Math.max(...filteredData.map(item => parseFloat(item.input1))) + 10 : 150
+                };
+                trendChart.options.scales.y1 = { display: false };
+            } else if (currentType === 'jitter') {
+                datasets = [
+                    {
+                        label: 'MDVP:Jitter(%)',
+                        data: filteredData.length ? filteredData.map(item => parseFloat(item.input4) || 0) : Array(labels.length).fill(0),
+                        borderColor: '#ea4335',
+                        backgroundColor: 'rgba(234, 67, 53, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'MDVP:RAP',
+                        data: filteredData.length ? filteredData.map(item => parseFloat(item.input6) || 0) : Array(labels.length).fill(0),
+                        borderColor: '#fbbc05',
+                        backgroundColor: 'rgba(251, 188, 5, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Normal Range',
+                        data: Array(labels.length).fill(0.002),
+                        borderColor: '#34a853',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0
+                    }
+                ];
+                trendChart.options.scales.y = {
+                    title: { display: true, text: 'Jitter Measures' },
+                    min: filteredData.length ? Math.max(0, Math.min(...filteredData.map(item => parseFloat(item.input4))) - 0.002) : 0.002,
+                    max: filteredData.length ? Math.max(...filteredData.map(item => parseFloat(item.input4))) + 0.002 : 0.007
+                };
+                trendChart.options.scales.y1 = { display: false };
+            } else if (currentType === 'shimmer') {
+                datasets = [
+                    {
+                        label: 'MDVP:Shimmer',
+                        data: filteredData.length ? filteredData.map(item => parseFloat(item.input9) || 0) : Array(labels.length).fill(0),
+                        borderColor: '#4285f4',
+                        backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Shimmer:APQ5',
+                        data: filteredData.length ? filteredData.map(item => parseFloat(item.input12) || 0) : Array(labels.length).fill(0),
+                        borderColor: '#fbbc05',
+                        backgroundColor: 'rgba(251, 188, 5, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Normal Range',
+                        data: Array(labels.length).fill(0.02),
+                        borderColor: '#34a853',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0
+                    }
+                ];
+                trendChart.options.scales.y = {
+                    title: { display: true, text: 'Shimmer Measures' },
+                    min: filteredData.length ? Math.max(0, Math.min(...filteredData.map(item => parseFloat(item.input9))) - 0.01) : 0.015,
+                    max: filteredData.length ? Math.max(...filteredData.map(item => parseFloat(item.input9))) + 0.01 : 0.035
+                };
+                trendChart.options.scales.y1 = { display: false };
+            } else if (currentType === 'hnr_nhr') {
+                datasets = [
+                    {
+                        label: 'HNR',
+                        data: filteredData.length ? filteredData.map(item => parseFloat(item.input16) || 0) : Array(labels.length).fill(0),
+                        borderColor: '#4285f4',
+                        backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'NHR',
+                        data: filteredData.length ? filteredData.map(item => parseFloat(item.input15) || 0) : Array(labels.length).fill(0),
+                        borderColor: '#ea4335',
+                        backgroundColor: 'rgba(234, 67, 53, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        label: 'Normal HNR',
+                        data: Array(labels.length).fill(25.0),
+                        borderColor: '#34a853',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0
+                    }
+                ];
+                trendChart.options.scales.y = {
+                    title: { display: true, text: 'HNR' },
+                    min: filteredData.length ? Math.max(10, Math.min(...filteredData.map(item => parseFloat(item.input16))) - 5) : 20,
+                    max: filteredData.length ? Math.max(...filteredData.map(item => parseFloat(item.input16))) + 5 : 26
+                };
+                trendChart.options.scales.y1 = {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: { display: true, text: 'NHR' },
+                    min: filteredData.length ? Math.max(0, Math.min(...filteredData.map(item => parseFloat(item.input15))) - 0.01) : 0.015,
+                    max: filteredData.length ? Math.max(...filteredData.map(item => parseFloat(item.input15))) + 0.01 : 0.025,
+                    grid: { drawOnChartArea: false }
+                };
+            } else if (currentType === 'nonlinear') {
+                datasets = [
+                    {
+                        label: 'RPDE',
+                        data: filteredData.length ? filteredData.map(item => parseFloat(item.input17) || 0) : Array(labels.length).fill(0),
+                        borderColor: '#4285f4',
+                        backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'PPE',
+                        data: filteredData.length ? filteredData.map(item => parseFloat(item.input22) || 0) : Array(labels.length).fill(0),
+                        borderColor: '#ea4335',
+                        backgroundColor: 'rgba(234, 67, 53, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        label: 'Normal RPDE',
+                        data: Array(labels.length).fill(0.35),
+                        borderColor: '#34a853',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0
+                    }
+                ];
+                trendChart.options.scales.y = {
+                    title: { display: true, text: 'RPDE' },
+                    min: filteredData.length ? Math.max(0, Math.min(...filteredData.map(item => parseFloat(item.input17))) - 0.1) : 0.35,
+                    max: filteredData.length ? Math.max(...filteredData.map(item => parseFloat(item.input17))) + 0.1 : 0.45
+                };
+                trendChart.options.scales.y1 = {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: { display: true, text: 'PPE' },
+                    min: filteredData.length ? Math.max(0, Math.min(...filteredData.map(item => parseFloat(item.input22))) - 0.1) : 0.15,
+                    max: filteredData.length ? Math.max(...filteredData.map(item => parseFloat(item.input22))) + 0.1 : 0.25,
+                    grid: { drawOnChartArea: false }
+                };
+            }
+
+            trendChart.data.labels = labels;
+            trendChart.data.datasets = datasets;
+            trendChart.update();
+        }
+
+        // Initialize chart
+        function initializeChart() {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Fundamental Frequency (Hz)' },
+                            min: 140,
+                            max: 150
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: false,
+                            position: 'right',
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+            updateChart();
+        }
+
+        // Document ready event
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize patient info
+            const username = localStorage.getItem('loggedInUsername') || 'Guest';
+            const avatar = document.querySelector('.patient-avatar');
+            const nameElement = document.querySelector('.patient-details h2');
+            const nameParts = username.split(' ');
+            const initials = nameParts.length > 1 
+                ? nameParts[0].charAt(0) + nameParts[nameParts.length-1].charAt(0)
+                : username.charAt(0);
+            avatar.textContent = initials;
+            nameElement.textContent = username;
+
+            // Fetch historical data and initialize chart
+            fetchHistoricalData(() => {
+                initializeChart();
+
+                // Update patient info and metrics
+                const sanitizedUsername = username.replace(/[.#$[\]]/g, '_');
+                const predictionsRef = database.ref(`users/${sanitizedUsername}/parkinsons_predictions`);
+
+                predictionsRef.orderByKey().limitToLast(1).once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        const predictionData = Object.values(snapshot.val())[0];
+
+                        // Update age and gender
+                        const ageElement = document.querySelector('.patient-meta span:first-child');
+                        const genderElement = document.querySelector('.patient-meta span:nth-child(2)');
+                        ageElement.textContent = predictionData.age ? `Age: ${predictionData.age}` : 'Age: Unknown';
+                        genderElement.textContent = predictionData.gender !== undefined ? `Gender: ${predictionData.gender === '1' ? 'Male' : 'Female'}` : 'Gender: Unknown';
+
+                        // Update vocal metrics
+                        document.getElementById('mdvpFo').textContent = predictionData.input1 ? parseFloat(predictionData.input1).toFixed(2) : 'N/A';
+                        document.getElementById('mdvpFhi').textContent = predictionData.input2 ? parseFloat(predictionData.input2).toFixed(2) : 'N/A';
+                        document.getElementById('mdvpFlo').textContent = predictionData.input3 ? parseFloat(predictionData.input3).toFixed(2) : 'N/A';
+                        document.getElementById('mdvpJitter').textContent = predictionData.input4 ? parseFloat(predictionData.input4).toFixed(4) : 'N/A';
+                        document.getElementById('mdvpJitterAbs').textContent = predictionData.input5 ? parseFloat(predictionData.input5).toFixed(6) : 'N/A';
+                        document.getElementById('mdvpRap').textContent = predictionData.input6 ? parseFloat(predictionData.input6).toFixed(4) : 'N/A';
+                        document.getElementById('mdvpPpq').textContent = predictionData.input7 ? parseFloat(predictionData.input7).toFixed(4) : 'N/A';
+                        document.getElementById('jitterDdp').textContent = predictionData.input8 ? parseFloat(predictionData.input8).toFixed(4) : 'N/A';
+                        document.getElementById('mdvpShimmer').textContent = predictionData.input9 ? parseFloat(predictionData.input9).toFixed(3) : 'N/A';
+                        document.getElementById('mdvpShimmerDb').textContent = predictionData.input10 ? parseFloat(predictionData.input10).toFixed(2) : 'N/A';
+                        document.getElementById('shimmerApq3').textContent = predictionData.input11 ? parseFloat(predictionData.input11).toFixed(3) : 'N/A';
+                        document.getElementById('shimmerApq5').textContent = predictionData.input12 ? parseFloat(predictionData.input12).toFixed(3) : 'N/A';
+                        document.getElementById('mdvpApq').textContent = predictionData.input13 ? parseFloat(predictionData.input13).toFixed(3) : 'N/A';
+                        document.getElementById('shimmerDda').textContent = predictionData.input14 ? parseFloat(predictionData.input14).toFixed(3) : 'N/A';
+                        document.getElementById('nhr').textContent = predictionData.input15 ? parseFloat(predictionData.input15).toFixed(3) : 'N/A';
+                        document.getElementById('hnr').textContent = predictionData.input16 ? parseFloat(predictionData.input16).toFixed(1) : 'N/A';
+                        document.getElementById('rpde').textContent = predictionData.input17 ? parseFloat(predictionData.input17).toFixed(2) : 'N/A';
+                        document.getElementById('dfa').textContent = predictionData.input18 ? parseFloat(predictionData.input18).toFixed(2) : 'N/A';
+                        document.getElementById('spread1').textContent = predictionData.input19 ? parseFloat(predictionData.input19).toFixed(2) : 'N/A';
+                        document.getElementById('spread2').textContent = predictionData.input20 ? parseFloat(predictionData.input20).toFixed(2) : 'N/A';
+                        document.getElementById('d2').textContent = predictionData.input21 ? parseFloat(predictionData.input21).toFixed(2) : 'N/A';
+                        document.getElementById('ppe').textContent = predictionData.input22 ? parseFloat(predictionData.input22).toFixed(2) : 'N/A';
+
+                        // Update summary card
+                        const severity = predictionData.severity || 'None';
+                        document.getElementById('currentStage').textContent = severity === 'None' ? 'No Diagnosis' : severity === 'Mild' ? 'Hoehn & Yahr Stage 1' : 'Hoehn & Yahr Stage 2';
+                        document.getElementById('lastAssessment').textContent = predictionData.timestamp ? formatTimestamp(predictionData.timestamp) : 'N/A';
+                        document.getElementById('progressionRisk').textContent = severity === 'None' ? 'Low' : severity === 'Mild' ? 'Low' : 'Medium';
+                        document.getElementById('progressionBadge').textContent = severity === 'None' ? 'No Progression' : `${severity} Progression`;
+                        document.getElementById('riskIndicator').style.left = severity === 'None' ? '20%' : severity === 'Mild' ? '40%' : '65%';
+
+                        // Update clinical alerts
+                        const alertsContainer = document.getElementById('alertsContainer');
+                        alertsContainer.innerHTML = '';
+
+                        if (predictionData.input4 > 0.005) {
+                            const alertItem = document.createElement('div');
+                            alertItem.className = 'alert-item';
+                            alertItem.innerHTML = `
+                                <div class="alert-icon alert-warning">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0378 2.66667 10.268 4L3.33978 16C2.56998 17.3333 3.53223 19 5.07183 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="alert-content">
+                                    <div class="alert-title">Increased Jitter</div>
+                                    <div class="alert-message">Jitter (${parseFloat(predictionData.input4).toFixed(4)}) exceeds normal threshold (0.005)</div>
+                                    <div class="alert-time">${new Date().toLocaleString()}</div>
+                                </div>
+                            `;
+                            alertsContainer.appendChild(alertItem);
+                        }
+
+                        if (predictionData.input9 > 0.03) {
+                            const alertItem = document.createElement('div');
+                            alertItem.className = 'alert-item';
+                            alertItem.innerHTML = `
+                                <div class="alert-icon alert-warning">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0378 2.66667 10.268 4L3.33978 16C2.56998 17.3333 3.53223 19 5.07183 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="alert-content">
+                                    <div class="alert-title">Increased Shimmer</div>
+                                    <div class="alert-message">Shimmer (${parseFloat(predictionData.input9).toFixed(3)}) exceeds normal threshold (0.03)</div>
+                                    <div class="alert-time">${new Date().toLocaleString()}</div>
+                                </div>
+                            `;
+                            alertsContainer.appendChild(alertItem);
+                        }
+
+                        if (predictionData.input16 < 25) {
+                            const alertItem = document.createElement('div');
+                            alertItem.className = 'alert-item';
+                            alertItem.innerHTML = `
+                                <div class="alert-icon alert-warning">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0378 2.66667 10.268 4L3.33978 16C2.56998 17.3333 3.53223 19 5.07183 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="alert-content">
+                                    <div class="alert-title">Reduced HNR</div>
+                                    <div class="alert-message">HNR (${parseFloat(predictionData.input16).toFixed(1)}) is below normal threshold (25)</div>
+                                    <div class="alert-time">${new Date().toLocaleString()}</div>
+                                </div>
+                            `;
+                            alertsContainer.appendChild(alertItem);
+                        }
+
+                        if (predictionData.input22 > 0.2) {
+                            const alertItem = document.createElement('div');
+                            alertItem.className = 'alert-item';
+                            alertItem.innerHTML = `
+                                <div class="alert-icon alert-info">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="alert-content">
+                                    <div class="alert-title">PPE Increase</div>
+                                    <div class="alert-message">PPE (${parseFloat(predictionData.input22).toFixed(2)}) suggests progression</div>
+                                    <div class="alert-time">${new Date().toLocaleString()}</div>
+                                </div>
+                            `;
+                            alertsContainer.appendChild(alertItem);
+                        }
+                    } else {
+                        console.log('No prediction data found in Firebase');
+                    }
+                }).catch(error => {
+                    console.error('Error fetching prediction data:', error);
+                });
+            });
+
+            // Tab switching functionality
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentType = tab.dataset.type;
+                    updateChart();
+                });
+            });
+
+            // Time period buttons functionality
+            const periodButtons = document.querySelectorAll('.card-actions .btn');
+            periodButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    periodButtons.forEach(btn => {
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-outline');
+                    });
+                    button.classList.remove('btn-outline');
+                    button.classList.add('btn-primary');
+                    currentPeriod = parseInt(button.dataset.period);
+                    updateChart();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

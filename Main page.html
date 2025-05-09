@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Disease Prediction | Main Page</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Roboto', sans-serif;
+      overflow-x: hidden;
+      position: relative;
+      background: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    /* DNA background wrapper */
+    .dna-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .dna-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 200%;
+      background: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExY3ZwamQwZHMxdTBybmw4bHVuZmEycHFweTFkanZqcXhkYmdxdjEwMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YrTJKOe0FhQJAUXTyp/giphy.gif') center center / cover repeat-y;
+      opacity: 0.7;
+      animation: scrollBG 60s linear infinite;
+      filter: hue-rotate(260deg) saturate(2) brightness(0.85);
+    }
+
+    @keyframes scrollBG {
+      0% {
+        transform: translateY(0%);
+      }
+      100% {
+        transform: translateY(-50%);
+      }
+    }
+
+    /* Navigation */
+    nav {
+      background: rgba(98, 174, 236, 0.9);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(5px);
+      position: relative;
+      z-index: 100;
+    }
+
+    nav h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Profile dropdown */
+    .profile-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .profile-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .profile-photo {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .profile-username {
+      color: white;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .profile-dropdown {
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+      width: 180px;
+      overflow: hidden;
+      transform: translateY(-10px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1000;
+    }
+
+    .profile-dropdown.show {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .dropdown-item {
+      padding: 12px 16px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+      background: #f5f7fa;
+      color: #3e61b3;
+    }
+
+    .dropdown-item i {
+      width: 20px;
+      text-align: center;
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: #eee;
+      margin: 5px 0;
+    }
+
+    /* Welcome section */
+    .welcome {
+      padding: 3rem 2rem 2rem;
+      text-align: center;
+      color: #333;
+      opacity: 0;
+      animation: fadeInSmooth 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      animation-delay: 0.3s;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .welcome h2 {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      color: #3e61b3;
+      font-weight: 600;
+    }
+
+    .welcome p {
+      font-size: 1.1rem;
+      color: #555;
+    }
+
+    @keyframes fadeInSmooth {
+      0% {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Cards container */
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      opacity: 0;
+      animation: fadeInSmooth 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      animation-delay: 0.6s;
+    }
+
+    /* Cards */
+    .card {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(98, 174, 236, 0.1);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #62aeec, #3e61b3);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.03);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: #62aeec;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      transition: color 0.3s ease;
+    }
+
+    .card:hover h3 {
+      color: #3e61b3;
+    }
+
+    .card p {
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-icon {
+      font-size: 2.5rem;
+      color: #62aeec;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover .card-icon {
+      color: #3e61b3;
+      transform: scale(1.1);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      nav {
+        padding: 1rem;
+      }
+      
+      nav h1 {
+        font-size: 1.2rem;
+      }
+      
+      .welcome h2 {
+        font-size: 1.8rem;
+      }
+      
+      .cards-container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background DNA animation -->
+  <div class="dna-bg">
+    <div class="dna-layer"></div>
+  </div>
+
+  <!-- Navigation bar -->
+  <nav>
+    <h1>Disease Prediction Dashboard</h1>
+    <div class="profile-container" id="profileContainer" onclick="toggleProfileDropdown()">
+      <div class="profile-content">
+        <img class="profile-photo" id="profilePhoto" src="https://www.w3schools.com/howto/img_avatar.png" alt="Profile Photo">
+        <span class="profile-username" id="profileUsername"></span>
+        <i class="fas fa-chevron-down" id="dropdownArrow"></i>
+      </div>
+      <div class="profile-dropdown" id="profileDropdown">
+        <div class="dropdown-item">
+          <i class="fas fa-user"></i>
+          <span>My Profile</span>
+        </div>
+        <div class="dropdown-item">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Welcome section -->
+  <section class="welcome">
+    <h2 id="welcomeText">Welcome, <span id="username">Guest</span>!</h2>
+    <p>Select a prediction module to get started with your health assessment.</p>
+  </section>
+
+  <!-- Cards -->
+  <section class="cards-container">
+    <div class="card" onclick="goTo('Diabetes Prediction.html')">
+      <div class="card-icon">
+        <i class="fas fa-heartbeat"></i>
+      </div>
+      <h3>Diabetes Prediction</h3>
+      <p>Predict diabetes risk using health parameters like glucose levels, BMI, and more.</p>
+    </div>
+
+    <div class="card" onclick="goTo('Heart Disease Prediction.html')">
+      <div class="card-icon">
+        <i class="fas fa-heart"></i>
+      </div>
+      <h3>Heart Disease Prediction</h3>
+      <p>Check the likelihood of heart-related conditions based on your health metrics.</p>
+    </div>
+
+    <div class="card" onclick="goTo('Parkinsons Prediction.html')">
+      <div class="card-icon">
+        <i class="fas fa-brain"></i>
+      </div>
+      <h3>Parkinson's Disease Prediction</h3>
+      <p>Analyze symptoms and voice patterns to detect Parkinson's disease risk.</p>
+    </div>
+  </section>
+
+  <script>
+    // User profile functions
+    function updateProfile() {
+      const username = localStorage.getItem('loggedInUsername') || 'Guest';
+      console.log("updateProfile: loggedInUsername =", username);
+      
+      document.getElementById('profileUsername').textContent = username;
+      document.getElementById('username').textContent = username;
+      
+      // Update profile photo if available in localStorage
+      const savedPhoto = localStorage.getItem('profilePhoto');
+      if (savedPhoto) {
+        document.getElementById('profilePhoto').src = savedPhoto;
+      }
+    }
+
+    // Toggle profile dropdown
+    function toggleProfileDropdown() {
+      const dropdown = document.getElementById('profileDropdown');
+      const arrow = document.getElementById('dropdownArrow');
+      
+      dropdown.classList.toggle('show');
+      arrow.classList.toggle('fa-chevron-up');
+      arrow.classList.toggle('fa-chevron-down');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+      const profileContainer = document.getElementById('profileContainer');
+      const dropdown = document.getElementById('profileDropdown');
+      
+      if (!profileContainer.contains(event.target) && dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        document.getElementById('dropdownArrow').classList.remove('fa-chevron-up');
+        document.getElementById('dropdownArrow').classList.add('fa-chevron-down');
+      }
+    });
+
+    // Logout function
+    function logout() {
+      console.log("Logout triggered");
+      localStorage.removeItem('loggedInUsername');
+      localStorage.removeItem('profilePhoto');
+      window.location.href = "Login page.html";
+    }
+
+    // Navigation function
+    function goTo(page) {
+      window.location.href = page;
+    }
+
+    // Initialize on load
+    window.onload = function() {
+      updateProfile();
+      
+      // Add click animation to cards
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
+        card.addEventListener('click', function() {
+          this.style.transform = 'translateY(-8px) scale(0.98)';
+          setTimeout(() => {
+            this.style.transform = 'translateY(-8px) scale(1.03)';
+          }, 100);
+        });
+      });
+    };
+  </script>
+
+</body>
+</html>

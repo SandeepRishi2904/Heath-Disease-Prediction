@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Management Dashboard</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --accent: #4fc3f7;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --gray: #e9ecef;
+            --dark-gray: #6c757d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .patient-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .patient-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .patient-details h2 {
+            margin-bottom: 5px;
+        }
+        
+        .patient-meta {
+            display: flex;
+            gap: 15px;
+            color: var(--dark-gray);
+            font-size: 14px;
+        }
+        
+        .alert-badge {
+            background-color: var(--danger);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--dark-gray);
+            color: var(--dark-gray);
+        }
+        
+        .trend-card {
+            grid-column: span 8;
+        }
+        
+        .summary-card {
+            grid-column: span 4;
+        }
+        
+        .metrics-card {
+            grid-column: span 6;
+        }
+        
+        .alerts-card {
+            grid-column: span 6;
+        }
+        
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .metric-label {
+            font-size: 14px;
+            color: var(--dark-gray);
+        }
+        
+        .metric-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .metric-change {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+        
+        .positive {
+            color: var(--success);
+        }
+        
+        .negative {
+            color: var(--danger);
+        }
+        
+        .neutral {
+            color: var(--dark-gray);
+        }
+        
+        .alert-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .alert-item:last-child {
+            border-bottom: none;
+        }
+        
+        .alert-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .alert-critical {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .alert-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .alert-info {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .alert-content {
+            flex-grow: 1;
+        }
+        
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .alert-message {
+            font-size: 14px;
+            color: var(--dark-gray);
+        }
+        
+        .alert-time {
+            font-size: 12px;
+            color: var(--dark-gray);
+        }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--gray);
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .risk-meter {
+            height: 10px;
+            background: linear-gradient(to right, var(--success), var(--warning), var(--danger));
+            border-radius: 5px;
+            margin-top: 10px;
+            position: relative;
+        }
+        
+        .risk-indicator {
+            position: absolute;
+            top: -5px;
+            width: 4px;
+            height: 20px;
+            background-color: black;
+            transform: translateX(-50%);
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .metric-card {
+            background-color: var(--gray);
+            padding: 12px;
+            border-radius: 6px;
+        }
+        
+        .metric-card-title {
+            font-size: 12px;
+            color: var(--dark-gray);
+            margin-bottom: 5px;
+        }
+        
+        .metric-card-value {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .medications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .medication-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 15px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .trend-card,
+            .summary-card,
+            .metrics-card,
+            .alerts-card {
+                grid-column: span 1;
+            }
+            
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="patient-info">
+                <div class="patient-avatar" id="patientAvatar"></div>
+                <div class="patient-details">
+                    <h2 id="patientName"></h2>
+                    <div class="patient-meta">
+                        <span id="patientAge"></span>
+                        <span id="patientGender"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="alert-badge" id="riskBadge">N/A</div>
+        </header>
+        
+        <div class="dashboard-grid">
+            <!-- Trend Card -->
+            <div class="card trend-card">
+                <div class="card-header">
+                    <div class="card-title">Heart Health Trends</div>
+                    <div class="card-actions">
+                        <button class="btn btn-outline" data-period="7">7D</button>
+                        <button class="btn btn-outline" data-period="30">30D</button>
+                        <button class="btn btn-primary" data-period="90">90D</button>
+                    </div>
+                </div>
+                <div class="tab-container">
+                    <div class="tab active" data-type="trestbps">Blood Pressure</div>
+                    <div class="tab" data-type="chol">Cholesterol</div>
+                    <div class="tab" data-type="thalach">Max Heart Rate</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Summary Card -->
+            <div class="card summary-card">
+                <div class="card-header">
+                    <div class="card-title">Heart Health Summary</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-info">
+                        <div class="metric-label">Condition</div>
+                        <div class="metric-value">Heart Disease Risk</div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-info">
+                        <div class="metric-label">Last Assessment</div>
+                        <div class="metric-value" id="lastAssessment">N/A</div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-info">
+                        <div class="metric-label">Risk Level</div>
+                        <div class="metric-value" id="riskLevel">N/A</div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-info">
+                        <div class="metric-label">Next Cardiologist Visit</div>
+                        <div class="metric-value">TBD</div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-info">
+                        <div class="metric-label">Complication Risk</div>
+                        <div class="metric-value" id="complicationRisk">N/A</div>
+                    </div>
+                    <div class="risk-meter">
+                        <div class="risk-indicator" id="riskIndicator"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Metrics Card -->
+            <div class="card metrics-card">
+                <div class="card-header">
+                    <div class="card-title">Key Metrics</div>
+                </div>
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-card-title">Resting BP</div>
+                        <div class="metric-card-value" id="trestbpsValue">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">Cholesterol</div>
+                        <div class="metric-card-value" id="cholValue">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">Max Heart Rate</div>
+                        <div class="metric-card-value" id="thalachValue">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">Chest Pain Type</div>
+                        <div class="metric-card-value" id="cpValue">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">Fasting Blood Sugar</div>
+                        <div class="metric-card-value" id="fbsValue">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Resting ECG</div>
+                        <div class="metric-value" id="restecgValue">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">Exercise Angina</div>
+                        <div class="metric-card-value" id="exangValue">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">ST Depression</div>
+                        <div class="metric-card-value" id="oldpeakValue">N/A</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-title">Age</div>
+                        <div class="metric-card-value" id="ageValue">N/A</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alerts Card -->
+            <div class="card alerts-card">
+                <div class="card-header">
+                    <div class="card-title">Clinical Alerts</div>
+                </div>
+                <div id="alertsContainer">
+                    <!-- Alerts will be dynamically added here -->
+                </div>
+            </div>
+            
+            <!-- Medications Card -->
+            <div class="card" style="grid-column: span 12;">
+                <div class="card-header">
+                    <div class="card-title">Current Medications</div>
+                    <button class="btn btn-primary">Add Medication</button>
+                </div>
+                <div class="medications-grid">
+                    <div class="medication-card">
+                        <div class="medication-header">
+                            <div class="medication-name">Aspirin</div>
+                            <div class="medication-status status-active">Active</div>
+                        </div>
+                        <div class="metric-grid" style="grid-template-columns: 1fr 1fr; margin-top: 10px;">
+                            <div class="metric-card">
+                                <div class="metric-card-title">Dosage</div>
+                                <div class="metric-card-value">81 mg</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-card-title">Frequency</div>
+                                <div class="metric-card-value">Daily</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-card-title">Last Taken</div>
+                                <div class="metric-card-value">Today, 8:00 AM</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-card-title">Next Dose</div>
+                                <div class="metric-card-value">Tomorrow, 8:00 AM</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="medication-card" style="border-left-color: var(--warning);">
+                        <div class="medication-header">
+                            <div class="medication-name">Atorvastatin</div>
+                            <div class="medication-status status-active">Active</div>
+                        </div>
+                        <div class="metric-grid" style="grid-template-columns: 1fr 1fr; margin-top: 10px;">
+                            <div class="metric-card">
+                                <div class="metric-card-title">Dosage</div>
+                                <div class="metric-card-value">20 mg</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-card-title">Frequency</div>
+                                <div class="metric-card-value">Daily</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-card-title">Last Taken</div>
+                                <div class="metric-card-value">Today, 9:00 PM</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-card-title">Refill Due</div>
+                                <div class="metric-card-value">10 days</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbq99pDtYuiwtIWj6oV_YO3mmiNVofQZc",
+            authDomain: "disease-prediction-d046b.firebaseapp.com",
+            databaseURL: "https://disease-prediction-d046b-default-rtdb.firebaseio.com",
+            projectId: "disease-prediction-d046b",
+            storageBucket: "disease-prediction-d046b.appspot.com",
+            messagingSenderId: "766071515146",
+            appId: "1:766071515146:web:0dfdca1502dccc513497f3",
+            measurementId: "G-QGQYYJZVFQ"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Global variables
+        let trendChart;
+        let historicalData = [];
+        let currentPeriod = 90; // Default to 90 days
+        let currentType = 'trestbps'; // Default to Blood Pressure
+
+        // Helper function to format timestamp to date string
+        function formatTimestamp(timestamp) {
+            const date = new Date(parseInt(timestamp));
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        // Helper function to filter data by period
+        function filterDataByPeriod(data, days) {
+            const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+            return data.filter(item => parseInt(item.timestamp) >= cutoff);
+        }
+
+        // Fetch historical data from Firebase
+        function fetchHistoricalData(callback) {
+            const username = localStorage.getItem('loggedInUsername') || 'Guest';
+            const sanitizedUsername = username.replace(/[.#$[\]]/g, '_');
+            const predictionsRef = database.ref(`users/${sanitizedUsername}/heart_predictions`);
+
+            predictionsRef.once('value', (snapshot) => {
+                historicalData = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        const data = child.val();
+                        data.timestamp = child.key; // Store timestamp
+                        historicalData.push(data);
+                    });
+                    historicalData.sort((a, b) => parseInt(a.timestamp) - parseInt(b.timestamp));
+                }
+                callback();
+            }).catch(error => {
+                console.error('Error fetching historical data:', error);
+                callback();
+            });
+        }
+
+        // Initialize or update chart
+        function updateChart() {
+            const filteredData = filterDataByPeriod(historicalData, currentPeriod);
+            let labels = filteredData.map(item => formatTimestamp(item.timestamp));
+            let datasets = [];
+
+            if (filteredData.length === 0) {
+                labels = Array.from({ length: currentPeriod }, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - currentPeriod + i);
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+            }
+
+            if (currentType === 'trestbps') {
+                datasets = [
+                    {
+                        label: 'Resting BP (mm Hg)',
+                        data: filteredData.length ? filteredData.map(item => item.trestbps || 0) : Array(labels.length).fill(0),
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Target Range',
+                        data: Array(labels.length).fill(120),
+                        borderColor: '#2ecc71',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0
+                    }
+                ];
+                trendChart.options.scales.y = {
+                    min: 80,
+                    max: 200,
+                    ticks: { stepSize: 20 }
+                };
+            } else if (currentType === 'chol') {
+                datasets = [
+                    {
+                        label: 'Cholesterol (mg/dL)',
+                        data: filteredData.length ? filteredData.map(item => item.chol || 0) : Array(labels.length).fill(0),
+                        borderColor: '#4a6fa5',
+                        backgroundColor: 'rgba(74, 111, 165, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Target Range',
+                        data: Array(labels.length).fill(200),
+                        borderColor: '#2ecc71',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0
+                    }
+                ];
+                trendChart.options.scales.y = {
+                    min: 100,
+                    max: 300,
+                    ticks: { stepSize: 50 }
+                };
+            } else if (currentType === 'thalach') {
+                datasets = [
+                    {
+                        label: 'Max Heart Rate (bpm)',
+                        data: filteredData.length ? filteredData.map(item => item.thalach || 0) : Array(labels.length).fill(0),
+                        borderColor: '#f39c12',
+                        backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Target Range',
+                        data: Array(labels.length).fill(150),
+                        borderColor: '#2ecc71',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0
+                    }
+                ];
+                trendChart.options.scales.y = {
+                    min: 60,
+                    max: 220,
+                    ticks: { stepSize: 40 }
+                };
+            }
+
+            trendChart.data.labels = labels;
+            trendChart.data.datasets = datasets;
+            trendChart.update();
+        }
+
+        // Initialize chart
+        function initializeChart() {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: { min: 80, max: 200, ticks: { stepSize: 20 } }
+                    }
+                }
+            });
+            updateChart();
+        }
+
+        // Document ready event
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize patient info
+            const username = localStorage.getItem('loggedInUsername') || 'Guest';
+            const avatar = document.querySelector('.patient-avatar');
+            const nameElement = document.querySelector('.patient-details h2');
+            const nameParts = username.split(' ');
+            const initials = nameParts.length > 1 
+                ? nameParts[0].charAt(0) + nameParts[nameParts.length-1].charAt(0)
+                : username.charAt(0);
+            avatar.textContent = initials;
+            nameElement.textContent = username;
+
+            // Fetch historical data and initialize chart
+            fetchHistoricalData(() => {
+                initializeChart();
+                
+                // Update patient info and metrics
+                const sanitizedUsername = username.replace(/[.#$[\]]/g, '_');
+                const predictionsRef = database.ref(`users/${sanitizedUsername}/heart_predictions`);
+                
+                predictionsRef.orderByKey().limitToLast(1).once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        const predictionData = Object.values(snapshot.val())[0];
+                        
+                        // Update age and gender
+                        const ageElement = document.querySelector('.patient-meta span:first-child');
+                        const genderElement = document.querySelector('.patient-meta span:nth-child(2)');
+                        ageElement.textContent = predictionData.age ? `Age: ${predictionData.age}` : 'Age: N/A';
+                        genderElement.textContent = predictionData.sex !== undefined ? `Gender: ${predictionData.sex === 1 ? 'Male' : 'Female'}` : 'Gender: N/A';
+                        
+                        // Update key metrics
+                        document.getElementById('trestbpsValue').textContent = predictionData.trestbps ? `${predictionData.trestbps} mm Hg` : 'N/A';
+                        document.getElementById('cholValue').textContent = predictionData.chol ? `${predictionData.chol} mg/dL` : 'N/A';
+                        document.getElementById('thalachValue').textContent = predictionData.thalach ? `${predictionData.thalach} bpm` : 'N/A';
+                        document.getElementById('cpValue').textContent = predictionData.cp !== undefined ? {
+                            0: 'Typical Angina',
+                            1: 'Atypical Angina',
+                            2: 'Non-anginal Pain',
+                            3: 'Asymptomatic'
+                        }[predictionData.cp] : 'N/A';
+                        document.getElementById('fbsValue').textContent = predictionData.fbs !== undefined ? (predictionData.fbs === 1 ? 'True' : 'False') : 'N/A';
+                        document.getElementById('restecgValue').textContent = predictionData.restecg !== undefined ? {
+                            0: 'Normal',
+                            1: 'ST-T Wave Abnormality',
+                            2: 'Left Ventricular Hypertrophy'
+                        }[predictionData.restecg] : 'N/A';
+                        document.getElementById('exangValue').textContent = predictionData.exang !== undefined ? (predictionData.exang === 1 ? 'Yes' : 'No') : 'N/A';
+                        document.getElementById('oldpeakValue').textContent = predictionData.oldpeak ? `${predictionData.oldpeak}` : 'N/A';
+                        document.getElementById('ageValue').textContent = predictionData.age ? `${predictionData.age} years` : 'N/A';
+                        
+                        // Update summary
+                        document.getElementById('lastAssessment').textContent = predictionData.timestamp ? formatTimestamp(predictionData.timestamp) : 'N/A';
+                        document.getElementById('riskLevel').textContent = predictionData.severity || 'N/A';
+                        
+                        // Update risk information
+                        if (predictionData.severity) {
+                            document.getElementById('complicationRisk').textContent = predictionData.severity;
+                            document.getElementById('riskBadge').textContent = `${predictionData.severity} Risk`;
+                            
+                            const riskIndicator = document.getElementById('riskIndicator');
+                            if (predictionData.severity === 'None') {
+                                riskIndicator.style.left = '20%';
+                                document.getElementById('riskBadge').style.backgroundColor = 'var(--success)';
+                            } else if (predictionData.severity === 'Moderate') {
+                                riskIndicator.style.left = '50%';
+                                document.getElementById('riskBadge').style.backgroundColor = 'var(--warning)';
+                            } else {
+                                riskIndicator.style.left = '80%';
+                                document.getElementById('riskBadge').style.backgroundColor = 'var(--danger)';
+                            }
+                        }
+                        
+                        // Update clinical alerts
+                        const alertsContainer = document.getElementById('alertsContainer');
+                        alertsContainer.innerHTML = '';
+                        
+                        if (predictionData.trestbps > 140) {
+                            const alertItem = document.createElement('div');
+                            alertItem.className = 'alert-item';
+                            alertItem.innerHTML = `
+                                <div class="alert-icon alert-critical">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0378 2.66667 10.268 4L3.33978 16C2.56998 17.3333 3.53223 19 5.07183 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="alert-content">
+                                    <div class="alert-title">Hypertension Alert</div>
+                                    <div class="alert-message">Resting BP ${predictionData.trestbps} mm Hg exceeds safe threshold</div>
+                                    <div class="alert-time">${new Date().toLocaleString()}</div>
+                                </div>
+                            `;
+                            alertsContainer.appendChild(alertItem);
+                        }
+                        
+                        if (predictionData.chol > 240) {
+                            const alertItem = document.createElement('div');
+                            alertItem.className = 'alert-item';
+                            alertItem.innerHTML = `
+                                <div class="alert-icon alert-warning">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0378 2.66667 10.268 4L3.33978 16C2.56998 17.3333 3.53223 19 5.07183 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="alert-content">
+                                    <div class="alert-title">High Cholesterol Alert</div>
+                                    <div class="alert-message">Cholesterol ${predictionData.chol} mg/dL is elevated</div>
+                                    <div class="alert-time">${new Date().toLocaleString()}</div>
+                                </div>
+                            `;
+                            alertsContainer.appendChild(alertItem);
+                        }
+                        
+                        if (predictionData.thalach < 100 && predictionData.exang === 1) {
+                            const alertItem = document.createElement('div');
+                            alertItem.className = 'alert-item';
+                            alertItem.innerHTML = `
+                                <div class="alert-icon alert-warning">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0378 2.66667 10.268 4L3.33978 16C2.56998 17.3333 3.53223 19 5.07183 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="alert-content">
+                                    <div class="alert-title">Cardiac Stress Alert</div>
+                                    <div class="alert-message">Low max heart rate (${predictionData.thalach} bpm) with exercise-induced angina</div>
+                                    <div class="alert-time">${new Date().toLocaleString()}</div>
+                                </div>
+                            `;
+                            alertsContainer.appendChild(alertItem);
+                        }
+                    } else {
+                        console.log('No prediction data found in Firebase');
+                    }
+                }).catch(error => {
+                    console.error('Error fetching prediction data:', error);
+                });
+            });
+
+            // Tab switching functionality
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentType = tab.dataset.type;
+                    updateChart();
+                });
+            });
+
+            // Time period buttons functionality
+            const periodButtons = document.querySelectorAll('.card-actions .btn');
+            periodButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    periodButtons.forEach(btn => {
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-outline');
+                    });
+                    button.classList.remove('btn-outline');
+                    button.classList.add('btn-primary');
+                    currentPeriod = parseInt(button.dataset.period);
+                    updateChart();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
